@@ -14,6 +14,7 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.urls import reverse
+from .serialisers import CustomUserSerializer
 
 token_generator = PasswordResetTokenGenerator()
 
@@ -167,5 +168,70 @@ def reset_password(request, uidb64, token):
             return Response({'error': 'Invalid token.'}, status=status.HTTP_400_BAD_REQUEST)
     except CustomUser.DoesNotExist:
         return Response({'error': 'User does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_detail(request, user_id=None):
+    try:
+        if request.user.is_staff or request.user.is_superuser:
+            if user_id:
+                user = CustomUser.objects.get(id=user_id)
+                serializer = CustomUserSerializer(user)
+            else:
+                users = CustomUser.objects.all()
+                serializer = CustomUserSerializer(users, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            if user_id and int(user_id) != request.user.id:
+                return Response({'error': 'You are not authorized to view this user'}, status=status.HTTP_403_FORBIDDEN)
+            user = CustomUser.objects.get(id=request.user.id)
+            serializer = CustomUserSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+    except CustomUser.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_user(request, user_id):
+    try:
+        if request.user.is_staff or request.user.is_superuser:
+            user = CustomUser.objects.get(id=user_id)
+        else:
+            if int(user_id) != request.user.id:
+                return Response({'error': 'You are not authorized to update this user'}, status=status.HTTP_403_FORBIDDEN)
+            user = CustomUser.objects.get(id=request.user.id)
+
+        serializer = CustomUserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except CustomUser.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_user(request, user_id):
+    try:
+        if request.user.is_staff or request.user.is_superuser:
+            user = CustomUser.objects.get(id=user_id)
+        else:
+            if int(user_id) != request.user.id:
+                return Response({'error': 'You are not authorized to delete this user'}, status=status.HTTP_403_FORBIDDEN)
+            user = CustomUser.objects.get(id=request.user.id)
+
+        user.delete()
+        return Response({'message': 'User deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+    except CustomUser.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
