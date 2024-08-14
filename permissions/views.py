@@ -18,6 +18,7 @@ from .serialisers import CustomUserSerializer
 
 token_generator = PasswordResetTokenGenerator()
 
+# function for registering the user with help of email , username , password
 @api_view(['POST'])
 @permission_classes([])
 def register_user(request):
@@ -32,18 +33,19 @@ def register_user(request):
     except Exception as e:
         return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+# function for login user with the help of the email and password , and generates the token if the user is valid(register itself) and send the login mail 
 @api_view(['POST'])
 @permission_classes([])
 def login_user(request):
     data = request.data
-    email = data.get('email')  # Get email from request data
-    password = data.get('password')  # Get password from request data
+    email = data.get('email') 
+    password = data.get('password') 
 
     if not email or not password:
         return Response({"message": "Email and password are required"}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        user = authenticate(email=email, password=password)  # Authenticate using email
+        user = authenticate(email=email, password=password)  
         if user is not None:
             token, _ = Token.objects.get_or_create(user=user)
 
@@ -69,6 +71,7 @@ def login_user(request):
     except Exception as e:
         return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+# function for reset password with the help of the email , sends the password reset mail, this is done when the user is logged in and remember it old password and needs to create the new password
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def change_password(request):
@@ -105,6 +108,7 @@ def change_password(request):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+# function for sending the mail to reset the passwod this takes inputs email as an input and checks if its registered then only sends mails
 @api_view(['POST'])
 @permission_classes([])
 def request_password_reset(request):
@@ -135,6 +139,7 @@ def request_password_reset(request):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# this is the function which takes the new password as an input and sets the new password for the users and sends mail that the password  has been successfully changed
 @api_view(['POST'])
 @permission_classes([])
 def reset_password(request, uidb64, token):
@@ -171,6 +176,7 @@ def reset_password(request, uidb64, token):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# this is the function which get the user detials its only work when the user is authenticated and if the authenticated user is the admin then it will give all the user's list else it will return the authenticated user data
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_user_detail(request, user_id=None):
@@ -195,6 +201,7 @@ def get_user_detail(request, user_id=None):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# this is the function in which admin can update the any user but the user can only update his account
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def update_user(request, user_id):
@@ -217,6 +224,7 @@ def update_user(request, user_id):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# this is the function in which admin can delete the any user but the user can only delete his account
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def delete_user(request, user_id):
