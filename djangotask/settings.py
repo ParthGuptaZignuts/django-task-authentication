@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'permissions',
-    'authors'
+    'authors',
+    'products'
 ]
 
 MIDDLEWARE = [
@@ -52,7 +53,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'permissions.middleware.ModulePermissionMiddleware'
+    'permissions.middleware.ModulePermissionMiddleware',
+    'products.middleware.ModulePermissionMiddleware'
 ]
 
 ROOT_URLCONF = 'djangotask.urls'
