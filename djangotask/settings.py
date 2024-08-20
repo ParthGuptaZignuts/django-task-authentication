@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'permissions',
     'authors',
-    'products'
+    'products',
+    'Compaines'
 ]
 
 MIDDLEWARE = [
