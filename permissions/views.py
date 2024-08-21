@@ -15,6 +15,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.urls import reverse
 from .serialisers import CustomUserSerializer
+from rest_framework.authentication import get_authorization_header
 
 token_generator = PasswordResetTokenGenerator()
 
@@ -176,6 +177,33 @@ def reset_password(request, uidb64, token):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# this is the function which is used to logout the user when the user will be loggout then the token from the auth token will be deleted
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def logout_user(request):
+    try:
+        auth_header = get_authorization_header(request).split()
+        
+        if not auth_header or len(auth_header) != 2 or auth_header[0].lower() != b'token':
+            return Response({"error": "Invalid token header."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        token_key = auth_header[1].decode('utf-8')
+
+        token = Token.objects.get(key=token_key)
+        user = token.user
+        
+        if request.user != user:
+            return Response({"error": "Token does not match the authenticated user."}, status=status.HTTP_403_FORBIDDEN)
+
+        token.delete()
+        return Response({"message": "Logout successful. Token deleted."}, status=status.HTTP_200_OK)
+
+    except Token.DoesNotExist:
+        return Response({"error": "Token not found."}, status=status.HTTP_404_NOT_FOUND)
+    
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
 # this is the function which get the user detials its only work when the user is authenticated and if the authenticated user is the admin then it will give all the user's list else it will return the authenticated user data
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
