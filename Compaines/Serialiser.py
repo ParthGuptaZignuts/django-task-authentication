@@ -11,7 +11,7 @@ class CompanySerializer(serializers.ModelSerializer):
         model = Company
         fields = '__all__'
 
-class Department(serializers.ModelSerializer):
+class DepartmentSerializer(serializers.ModelSerializer):
     employees = serializers.StringRelatedField(many=True)
 
     class Meta:
