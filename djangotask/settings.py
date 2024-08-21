@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'authors',
     'products',
     'Compaines',
-    'graphene_django'
+    'graphene_django',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
@@ -56,7 +57,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'permissions.middleware.ModulePermissionMiddleware',
-    'products.middleware.ModulePermissionMiddleware'
+    'products.middleware.ModulePermissionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'djangotask.urls'
@@ -157,3 +159,30 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 GRAPHENE = {
     'SCHEMA': 'Compaines.schema.schema'
 }
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOWED_ORIGINS = [ 
+    "http://127.0.0.1:5173",
+    "http://localhost:5173",
+]
+
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+CORS_ALLOW_HEADERS = [
+    "content-type",
+    "authorization",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_EXPOSE_HEADERS = [
+    "Content-Type",
+    "Authorization",
+]
