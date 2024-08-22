@@ -12,7 +12,7 @@ urlpatterns = [
    path('logout-user',logout_user),
    path('change-password',change_password),
    path('request-password-reset', request_password_reset,name='request-password-reset'),
-   path('reset-password/<uidb64>/<token>',reset_password,name='reset-password'),
+   path('reset-password',reset_password,name='reset-password'),
 
    #users urls
    path('users',get_user_detail, name="get_user_detail"),

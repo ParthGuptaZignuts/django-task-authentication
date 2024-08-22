@@ -186,3 +186,5 @@ CORS_EXPOSE_HEADERS = [
     "Content-Type",
     "Authorization",
 ]
+
+FRONTEND_URL = "http://localhost:5173"

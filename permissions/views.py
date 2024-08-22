@@ -30,7 +30,10 @@ def register_user(request):
             password=data['password'],
             email=data['email']
         )
-        return Response({"message": "User created successfully"}, status=status.HTTP_201_CREATED)
+
+        role = 'admin' if data['email'] == 'admin@gmail.com' else 'user'
+
+        return Response({"message": "User created successfully", "role": role}, status=status.HTTP_201_CREATED)
     except Exception as e:
         return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -49,7 +52,7 @@ def login_user(request):
         user = authenticate(email=email, password=password)  
         if user is not None:
             token, _ = Token.objects.get_or_create(user=user)
-
+            role = 'admin' if email == 'admin@gmail.com' else 'user'
             subject = 'Login Notification'
             html_message = render_to_string('login_notification_email.html', {
                 'user': user,
@@ -66,7 +69,7 @@ def login_user(request):
                 html_message=html_message,
             )
 
-            return Response({"username": user.username, "token": token.key}, status=status.HTTP_200_OK)
+            return Response({"username": user.username, "token": token.key,"role":role}, status=status.HTTP_200_OK)
         else:
             return Response({"message": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
     except Exception as e:
@@ -117,8 +120,12 @@ def request_password_reset(request):
     try:
         user = CustomUser.objects.get(email=email)
         token = token_generator.make_token(user)
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        reset_link = request.build_absolute_uri(reverse('reset-password', args=[uid, token]))
+        
+        # Encode the email to make it safe for URLs
+        encoded_email = user.email
+        
+        # Include email in the reset link
+        reset_link = f"{settings.FRONTEND_URL}/reset-password?token={token}&email={encoded_email}"
 
         subject = 'Password Reset Request'
         html_message = render_to_string('password_reset_email.html', {
@@ -126,6 +133,7 @@ def request_password_reset(request):
             'reset_link': reset_link,
         })
         plain_message = strip_tags(html_message)
+        
         send_mail(
             subject,
             plain_message,
@@ -143,16 +151,24 @@ def request_password_reset(request):
 # this is the function which takes the new password as an input and sets the new password for the users and sends mail that the password  has been successfully changed
 @api_view(['POST'])
 @permission_classes([])
-def reset_password(request, uidb64, token):
-    try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = CustomUser.objects.get(pk=uid)
+def reset_password(request):
+    token = request.query_params.get('token')
+    email = request.query_params.get('email')
 
+    if not token or not email:
+        return Response({'error': 'Token and email are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        # Fetch the user by email
+        user = CustomUser.objects.get(email=email)
+
+        # Check the token validity
         if token_generator.check_token(user, token):
-            new_password = request.data.get('new_password')
+            new_password = request.data.get('password')
             if not new_password:
                 return Response({'error': 'New password cannot be empty.'}, status=status.HTTP_400_BAD_REQUEST)
 
+            # Set the new password and save the user
             user.set_password(new_password)
             user.save()
 
