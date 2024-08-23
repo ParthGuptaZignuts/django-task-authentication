@@ -11,11 +11,12 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.utils import timezone
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.urls import reverse
 from .serialisers import CustomUserSerializer
 from rest_framework.authentication import get_authorization_header
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.exceptions import AuthenticationFailed
 
 token_generator = PasswordResetTokenGenerator()
 
@@ -94,7 +95,7 @@ def change_password(request):
     try:
         user.set_password(new_password)
         user.save()
-        login_url = "http://127.0.0.1:8000/api/login-user"
+        login_url = f"{settings.FRONTEND_URL}/login"
         subject = 'Password Changed Successfully'
         html_message = render_to_string('password_changed_notification_email.html', {
             'login_link': login_url
@@ -285,5 +286,33 @@ def delete_user(request, user_id):
 
     except CustomUser.DoesNotExist:
         return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_from_token(request):
+    try:
+        # Extract token from the Authorization header
+        auth_header = request.headers.get('Authorization')
+        if not auth_header:
+            return Response({'error': 'Authorization header missing'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Extract token key from the 'Token <token_key>' format
+        try:
+            token_key = auth_header.split(' ')[1]
+        except IndexError:
+            return Response({'error': 'Invalid token header format'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Authenticate the token to get the user
+        token = Token.objects.get(key=token_key)
+        user = token.user
+
+        # Serialize and return the user details
+        serializer = CustomUserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    except Token.DoesNotExist:
+        return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

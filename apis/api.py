@@ -1,5 +1,5 @@
 from django.urls import path
-from permissions.views import register_user,login_user,logout_user,change_password,request_password_reset,reset_password,get_user_detail,update_user,delete_user
+from permissions.views import register_user,login_user,logout_user,change_password,request_password_reset,reset_password,get_user_detail,update_user,delete_user,get_user_from_token
 from authors.views import all_authors
 from products.views import all_products,single_product,update_product,create_product,delete_product
 from Compaines.views import all_companies, single_company, create_company, update_company, delete_company ,all_departments,single_department,create_department,update_department,delete_department,all_employees,single_employee,create_employee,update_employee,delete_employee,all_addresses,single_address,create_address,update_address,delete_address,all_projects,single_project,create_project,update_project,delete_project,all_tasks,single_task,create_task,update_task,delete_task
@@ -16,6 +16,7 @@ urlpatterns = [
 
    #users urls
    path('users',get_user_detail, name="get_user_detail"),
+   path('user-details',get_user_from_token),
    path('user/<int:user_id>',get_user_detail, name="get_user_detail"),
    path('update-user',update_user , name="update_user"),
    path('delete-user',delete_user , name="delete_user"),
