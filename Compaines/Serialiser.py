@@ -15,7 +15,7 @@ class DepartmentSerializer(serializers.ModelSerializer):
     employees = serializers.StringRelatedField(many=True)
 
     class Meta:
-        model = Department
+        model  = Department
         fields = '__all__'
 
 class EmployeeSerializer(serializers.ModelSerializer):
@@ -25,14 +25,14 @@ class EmployeeSerializer(serializers.ModelSerializer):
     tasks      = serializers.StringRelatedField(many=True)
 
     class Meta:
-        model = Employee
+        model  = Employee
         fields = '__all__'
 
 class AddressSerializer(serializers.ModelSerializer):
     company = serializers.StringRelatedField()
 
     class Meta:
-        model = Address
+        model  = Address
         fields = '__all__'
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -40,12 +40,12 @@ class ProjectSerializer(serializers.ModelSerializer):
     employees = serializers.StringRelatedField(many=True)
 
     class Meta:
-        model = Project
+        model  = Project
         fields = '__all__'
 
 class TaskSerializer(serializers.ModelSerializer):
     employee = serializers.StringRelatedField() 
 
     class Meta:
-        model = Task
+        model  = Task
         fields = '__all__'

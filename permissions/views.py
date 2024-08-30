@@ -27,9 +27,9 @@ def register_user(request):
     data = request.data
     try:
         user = CustomUser.objects.create_user(
-            username=data['username'],
-            password=data['password'],
-            email=data['email']
+            username = data['username'],
+            password = data['password'],
+            email    = data['email']
         )
 
         role = 'admin' if data['email'] == 'admin@gmail.com' else 'user'
@@ -42,8 +42,8 @@ def register_user(request):
 @api_view(['POST'])
 @permission_classes([])
 def login_user(request):
-    data = request.data
-    email = data.get('email') 
+    data     = request.data
+    email    = data.get('email') 
     password = data.get('password') 
 
     if not email or not password:
@@ -52,11 +52,11 @@ def login_user(request):
     try:
         user = authenticate(email=email, password=password)  
         if user is not None:
-            token, _ = Token.objects.get_or_create(user=user)
-            role = 'admin' if email == 'admin@gmail.com' else 'user'
-            subject = 'Login Notification'
+            token, _     = Token.objects.get_or_create(user=user)
+            role         = 'admin' if email == 'admin@gmail.com' else 'user'
+            subject      = 'Login Notification'
             html_message = render_to_string('login_notification_email.html', {
-                'user': user,
+                'user'      : user,
                 'login_time': timezone.now().strftime('%d-%m-%Y'),
             })
             plain_message = strip_tags(html_message)
@@ -66,11 +66,11 @@ def login_user(request):
                 plain_message,
                 settings.EMAIL_HOST_USER,
                 [user.email],
-                fail_silently=False,
-                html_message=html_message,
+                fail_silently = False,
+                html_message  = html_message,
             )
 
-            return Response({"username": user.username, "token": token.key,"role":role}, status=status.HTTP_200_OK)
+            return Response({"username": user.username, "token": token.key, "role": role}, status=status.HTTP_200_OK)
         else:
             return Response({"message": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
     except Exception as e:
@@ -207,7 +207,7 @@ def logout_user(request):
         token_key = auth_header[1].decode('utf-8')
 
         token = Token.objects.get(key=token_key)
-        user = token.user
+        user  = token.user
         
         if request.user != user:
             return Response({"error": "Token does not match the authenticated user."}, status=status.HTTP_403_FORBIDDEN)
@@ -228,16 +228,16 @@ def get_user_detail(request, user_id=None):
     try:
         if request.user.is_staff or request.user.is_superuser:
             if user_id:
-                user = CustomUser.objects.get(id=user_id)
+                user       = CustomUser.objects.get(id=user_id)
                 serializer = CustomUserSerializer(user)
             else:
-                users = CustomUser.objects.all()
+                users      = CustomUser.objects.all()
                 serializer = CustomUserSerializer(users, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             if user_id and int(user_id) != request.user.id:
                 return Response({'error': 'You are not authorized to view this user'}, status=status.HTTP_403_FORBIDDEN)
-            user = CustomUser.objects.get(id=request.user.id)
+            user       = CustomUser.objects.get(id=request.user.id)
             serializer = CustomUserSerializer(user)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -306,7 +306,7 @@ def get_user_from_token(request):
 
         # Authenticate the token to get the user
         token = Token.objects.get(key=token_key)
-        user = token.user
+        user  = token.user
 
         # Serialize and return the user details
         serializer = CustomUserSerializer(user)

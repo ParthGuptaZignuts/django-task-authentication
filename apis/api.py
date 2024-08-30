@@ -6,7 +6,7 @@ from Compaines.views import all_companies, single_company, create_company, updat
 
 urlpatterns = [
     
-   #authentication urls 
+   # Authentication urls 
    path('register-user',register_user),
    path('login-user',login_user),
    path('logout-user',logout_user),
@@ -14,37 +14,38 @@ urlpatterns = [
    path('request-password-reset', request_password_reset,name='request-password-reset'),
    path('reset-password',reset_password,name='reset-password'),
 
-   #users urls
+   # Users urls
    path('users',get_user_detail, name="get_user_detail"),
    path('user-details',get_user_from_token),
    path('user/<int:user_id>',get_user_detail, name="get_user_detail"),
    path('update-user',update_user , name="update_user"),
    path('delete-user',delete_user , name="delete_user"),
 
-   #authors urls 
+   # Authors urls 
    path('authors/all_authors',all_authors,name="all_authors"),
 
-   #products urls
+   # Products urls
    path('products/all-products',all_products, name='all_products'),
    path('products/<int:product_id>/',single_product, name='single_product'),
    path('products/create/',create_product, name='create_product'),
    path('products/update/<int:product_id>/',update_product, name='update_product'),
    path('products/delete/<int:product_id>/',delete_product, name='delete_product'),
    
+   # Companies urls
    path('companies/all-companies',all_companies, name='all_companies'),
    path('companies/<int:company_id>/',single_company, name='single_company'),
    path('companies/create/',create_company, name='create_company'),
    path('companies/<int:company_id>/update/',update_company, name='update_company'),
    path('companies/<int:company_id>/delete/',delete_company, name='delete_company'),
     
-    # Department URLs
+   # Department URLs
    path('departments/all-departments', all_departments, name='all_departments'),
    path('departments/<int:department_id>/', single_department, name='single_department'),
    path('departments/create/', create_department, name='create_department'),
    path('departments/<int:department_id>/update/', update_department, name='update_department'),
    path('departments/<int:department_id>/delete/', delete_department, name='delete_department'),
     
-    # Employee URLs
+   # Employee URLs
    path('employees/all-employees', all_employees, name='all_employees'),
    path('employees/<int:employee_id>/', single_employee, name='single_employee'),
    path('employees/create/', create_employee, name='create_employee'),
@@ -58,14 +59,14 @@ urlpatterns = [
    path('addresses/<int:address_id>/update/', update_address, name='update_address'),
    path('addresses/<int:address_id>/delete/', delete_address, name='delete_address'),
     
-    # Project URLs
+   # Project URLs
    path('projects/all-projects', all_projects, name='all_projects'),
    path('projects/<int:project_id>/', single_project, name='single_project'),
    path('projects/create/', create_project, name='create_project'),
    path('projects/<int:project_id>/update/', update_project, name='update_project'),
    path('projects/<int:project_id>/delete/', delete_project, name='delete_project'),
     
-    # Task URLs
+   # Task URLs
    path('tasks/all-tasks', all_tasks, name='all_tasks'),
    path('tasks/<int:task_id>/', single_task, name='single_task'),
    path('tasks/create/', create_task, name='create_task'),
